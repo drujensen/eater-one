@@ -69,8 +69,6 @@ reset:
 ; This allows support for 8bit ASCII codes from the keyboard.  We will display the
 ; prompt and loop forever.
 
-                jsr     delay
-                jsr     delay
                 lda     #PROMPT
                 jsr     echo
 
@@ -278,12 +276,12 @@ prhex:
 ;-------------------------------------------------------------------------
 
 echo:
+                jsr     delay
                 sta     DSP          ; Output character.
                 ora     #E           ; Set E bit
                 sta     DSP
                 eor     #E           ; Clear E bit
                 sta     DSP
-                jsr     delay
                 rts
 
 delay:
@@ -306,13 +304,11 @@ done:
                 jsr     echo
                 lda     #PROMPT
                 jsr     echo
+nmi:
                 rti
 
 irq:
                 jsr     nextchar      ; key pressed!
-                rti
-
-nmi:
                 rti
 
 .segment "VECTORS"
