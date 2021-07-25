@@ -60,54 +60,59 @@ reset:
                 sta     DSPDR
                 lda     #%00000000  ; Set all pins on port A to input
                 sta     KBDDR
-                lda     #%00000001  ; Set positive active edge for CA1
+                lda     #%00000001  ; Set positive active edge for CB1 and CA1
                 sta     PCR
-                lda     #%10000010  ; enable CA1 interrupt
+                lda     #%10000010  ; enable CB1 and CA1 interrupt
                 sta     IER
 
-; The program has been modified to use the IRQ instead of the 7tbh bit of the keybard.
-; This allows support for 8bit ASCII codes from the keyboard.  We will display the
-; prompt and loop forever.
-
-                lda     #PROMPT
-                jsr     echo
-
-loop:
-                jmp     loop
-
+; Program falls through to the GETLINE routine to save some program bytes
+; Please note that Y still holds $7F, which will cause an automatic Escape
 
 ;-------------------------------------------------------------------------
 ; The GETLINE process
 ;-------------------------------------------------------------------------
-; Called by the Interrupt Handler
-nextchar:
-                lda     KBD
-                sta     IN,Y
-                jsr     echo
-                cmp     #CR
-                beq     enter
-                cmp     #BS
-                beq     backspace
-                cmp     #ESC
-                beq     escape
-                iny
-                rts
 
-backspace:
-                lda     #$00        ; clear value from buffer
-                sta     IN,Y
-                dey                 ; Decrement the buffer pointer
-                rts
+anykey:
+                lda     #$55         ; Look for interrupt
+                ;bit     %10000010  ; check keyboard bit
+                jsr     prbyte
+                jmp     anykey      ; No key yet!
+
+notcr:
+                cmp     #BS         ; Baskspace key?
+                beq     backspace   ; Yes
+                cmp     #ESC        ; ESC?
+                beq     escape      ; Yes
+                iny                 ; Advance text index
+                bpl     nextchar    ; Auto ESC if line longer than 127
 
 escape:
-                ldy     #$00        ; Reset the buffer pointer
                 lda     #PROMPT     ; Print promt character
                 jsr     echo        ; Output it.
-                rts
 
-enter:
+getline:
+                lda     #CR
+                jsr     echo
+
+                ldy     #0+1        ; Start a new input line
+backspace:
+                dey                 ; backup text input
+                bmi     getline     ; oops, line's empty, reinitialize
+
+nextchar:
+                lda     IFR         ; Look for interrupt
+                ;bit     %10000010   ; check keyboard bit
+                bmi     nextchar    ; No key yet!
+                lda     KBD         ; Load Character.
+                sta     IN,Y        ; Add to text buffer
+                jsr     echo        ; Display character
+                cmp     #CR
+                bne     notcr       ; IT's not CR!
+
+; Line received, now let's parse it
+
                 ldy     #$ff        ; Reset text index
-                lda     #$00        ; Default mode is XAM
+                lda     #0          ; Default mode is XAM
                 tax                 ; X=0
 
 setstor:
@@ -274,7 +279,6 @@ prhex:
 ;-------------------------------------------------------------------------
 ;  Subroutine to print a character to the terminal
 ;-------------------------------------------------------------------------
-                nop
 echo:
                 sta     DSP          ; Output character.
                 ora     #E           ; Set E bit
@@ -317,10 +321,7 @@ done:
                 rts
 
 nmi:
-                rti
-
 irq:
-                jsr     nextchar      ; key pressed!
                 rti
 
 .segment "VECTORS"
