@@ -274,36 +274,48 @@ prhex:
 ;-------------------------------------------------------------------------
 ;  Subroutine to print a character to the terminal
 ;-------------------------------------------------------------------------
-
+                nop
 echo:
-                jsr     delay
                 sta     DSP          ; Output character.
                 ora     #E           ; Set E bit
                 sta     DSP
                 eor     #E           ; Clear E bit
                 sta     DSP
+                jsr     delay
                 rts
 
 delay:
                 pha
-                tax
+                tya
                 pha
-                ldx    #$FF
-dloop:
-                dex
-                nop
-                nop
-                bne     dloop
-                pla
                 txa
+                pha
+                ldy    #$0F
+dyloop:
+                ldx    #$FF
+dxloop:
+                dex
+                bne     dxloop
+                dey
+                bne     dyloop
+                pla
+                tax
+                pla
+                tay
                 pla
                 rts
+
+clear:
+                lda     #ESC
+                jsr     echo
 
 done:
                 lda     #CR
                 jsr     echo
                 lda     #PROMPT
                 jsr     echo
+                rts
+
 nmi:
                 rti
 
