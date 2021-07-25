@@ -1,3 +1,2 @@
-a.out
-eatermon.o
-rom.bin
+*.o
+*.bin
