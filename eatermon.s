@@ -59,10 +59,8 @@ reset:
                 lda     #%11111111  ; Set all pins on port B to output
                 sta     DSPDR
                 lda     #%00000000  ; Set all pins on port A to input
-                sta     KBDDR
-                lda     #%00000001  ; Set positive active edge for CB1 and CA1
                 sta     PCR
-                lda     #%10000010  ; enable CB1 and CA1 interrupt
+                lda     #%10010010  ; enable CB1 and CA1 interrupt
                 sta     IER
 
 ; Program falls through to the GETLINE routine to save some program bytes
@@ -71,12 +69,6 @@ reset:
 ;-------------------------------------------------------------------------
 ; The GETLINE process
 ;-------------------------------------------------------------------------
-
-anykey:
-                lda     #$55         ; Look for interrupt
-                ;bit     %10000010  ; check keyboard bit
-                jsr     prbyte
-                jmp     anykey      ; No key yet!
 
 notcr:
                 cmp     #BS         ; Baskspace key?
@@ -100,10 +92,7 @@ backspace:
                 bmi     getline     ; oops, line's empty, reinitialize
 
 nextchar:
-                lda     IFR         ; Look for interrupt
-                ;bit     %10000010   ; check keyboard bit
-                bmi     nextchar    ; No key yet!
-                lda     KBD         ; Load Character.
+                jsr     get         ; Get next key
                 sta     IN,Y        ; Add to text buffer
                 jsr     echo        ; Display character
                 cmp     #CR
@@ -127,11 +116,7 @@ blskip:
 nextitem:
                 lda     IN,Y        ; Get character
                 cmp     #CR
-                bne     notdone
-                jsr     done        ; We're done if it's CR!
-                rts
-
-notdone:
+                beq     getline
                 cmp     #'.'        ;
                 bcc     blskip      ; Ignore everything below '.'!
                 beq     setmode     ; Set BLOCK XAM mode ("." = $AE)
@@ -280,12 +265,18 @@ prhex:
 ;  Subroutine to print a character to the terminal
 ;-------------------------------------------------------------------------
 echo:
+                pha
+echo_wait:
+                lda     IFR          ; Look for interrupt
+                and     #%00010000    ; check display bit
+                beq     echo_wait
+                lda     DSP
+                pla
                 sta     DSP          ; Output character.
                 ora     #E           ; Set E bit
                 sta     DSP
                 eor     #E           ; Clear E bit
                 sta     DSP
-                jsr     delay
                 rts
 
 delay:
@@ -294,7 +285,7 @@ delay:
                 pha
                 txa
                 pha
-                ldy    #$0F
+                ldy    #$FF
 dyloop:
                 ldx    #$FF
 dxloop:
@@ -309,23 +300,14 @@ dxloop:
                 pla
                 rts
 
-clear:
-                lda     #ESC
-                jsr     echo
-
-done:
-                lda     #CR
-                jsr     echo
-                lda     #PROMPT
-                jsr     echo
+get:
+                lda     IFR          ; Look for interrupt
+                and     #%00000010   ; check keyboard bit
+                beq     get          ; No key yet!
+                lda     KBD          ; Load Character.
                 rts
 
-nmi:
-irq:
-                rti
-
 .segment "VECTORS"
-                .word   nmi
+                .word   $0F00
                 .word   reset
-                .word   irq
-
+                .word   $0000
