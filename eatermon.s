@@ -41,7 +41,7 @@ SPACE           =       $20         ; Space
 BS              =       $7F         ; Back Space
 CR              =       $0D         ; Carriage Return
 ESC             =       $1B         ; ESC key
-PROMPT          =       '>'         ; Prompt character
+PROMPT          =       $5C         ; Prompt character
 
 ;-------------------------------------------------------------------------
 ;  Let's get started
