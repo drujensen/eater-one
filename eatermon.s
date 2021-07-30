@@ -119,7 +119,10 @@ nextitem:
                 beq     getline
                 cmp     #'.'        ;
                 bcc     blskip      ; Ignore everything below '.'!
-                beq     setmode     ; Set BLOCK XAM mode ("." = $AE)
+                bne     not_dot
+                lda     #$AE
+                jmp     setmode     ; Set BLOCK XAM mode ("." = $AE)
+not_dot:
                 cmp     #':'
                 beq     setstor     ; Set STORE mode! $BA will become $7B
                 cmp     #'R'
