@@ -317,6 +317,9 @@ dxloop:
                 pla
                 rts
 
+.segment "BASIC"
+
+
 .segment "VECTORS"
                 .word   $0F00
                 .word   reset
