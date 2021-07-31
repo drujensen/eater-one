@@ -7,6 +7,13 @@
 
 .segment "OS"
 
+mapping:
+               jmp     reset
+               jmp     prbyte
+               jmp     echo
+               jmp     get
+               jmp     delay
+
 ;-------------------------------------------------------------------------
 ;  Memory declaration
 ;-------------------------------------------------------------------------
@@ -282,6 +289,13 @@ echo_wait:
                 sta     DSP
                 rts
 
+get:
+                lda     IFR          ; Look for interrupt
+                and     #%00000010   ; check keyboard bit
+                beq     get          ; No key yet!
+                lda     KBD          ; Load Character.
+                rts
+
 delay:
                 pha
                 tya
@@ -301,13 +315,6 @@ dxloop:
                 pla
                 tay
                 pla
-                rts
-
-get:
-                lda     IFR          ; Look for interrupt
-                and     #%00000010   ; check keyboard bit
-                beq     get          ; No key yet!
-                lda     KBD          ; Load Character.
                 rts
 
 .segment "VECTORS"
