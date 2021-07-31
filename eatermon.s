@@ -233,7 +233,7 @@ xamnext:
 
 mod8chk:
                 lda     XAML         ; If address MOD 8 = 0 start new line
-                and     #%00000111
+                and     #%00000011
                 bpl     nxtprnt      ; Always taken.
 
 ;-------------------------------------------------------------------------
