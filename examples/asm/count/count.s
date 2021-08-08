@@ -13,7 +13,7 @@ LTRA            =       $61     ; letter a
 CNT             =       $1A     ; 26 letters
 
                 lda     #ESC    ; Clear the screen
-                jsr     chout    
+                jsr     chout
 begin:
                 lda     #LTRA   ; ASCII for A
                 ldx     #CNT    ; a through z

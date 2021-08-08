@@ -12,7 +12,7 @@ ESC             =       $1B     ; escape
 
 begin:
                 lda     #ESC    ; Clear the screen
-                jsr     chout    
+                jsr     chout
                 ldx     #$00    ; counter
 loop:
                 lda     message,x

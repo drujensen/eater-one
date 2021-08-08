@@ -29,14 +29,14 @@ MODE            =       $2B         ; $00=XAM, $7F=STOR, $AE=BLOCK XAM
 
 IN              =       $0200       ; Input buffer
 
-DSP             =       $6000       ; Display Output Register B
-DSPDR           =       $6002       ; Display Data Direction Register B
-KBD             =       $6001       ; Keyboard Input Register A
-KBDDR           =       $6003       ; Keyboard Data Direction Register A
+DSP             =       $7C00       ; Display Output Register B
+DSPDR           =       $7C02       ; Display Data Direction Register B
+KBD             =       $7C01       ; Keyboard Input Register A
+KBDDR           =       $7C03       ; Keyboard Data Direction Register A
 
-PCR             =       $600C       ; Peripheral Control Register
-IFR             =       $600D       ; Interrupt Flag Register
-IER             =       $600E       ; Ineterrup Enable Register
+PCR             =       $7C0C       ; Peripheral Control Register
+IFR             =       $7C0D       ; Interrupt Flag Register
+IER             =       $7C0E       ; Ineterrup Enable Register
 
 E               =       %10000000   ; Display triggered using bit 0 rising edge
 

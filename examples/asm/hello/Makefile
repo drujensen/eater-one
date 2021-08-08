@@ -1,7 +1,10 @@
 all: deploy
 
-deploy: build
-	hexdump -C hello.bin
+deploy: bin2mon
+	../../upload.py hello.mon
+
+bin2mon: build
+	bintomon -l 0x0000 -r 0x1000 -b 4 -c 0x00 hello.bin > hello.mon
 
 build: compile
 	ld65 -C build.cfg -o hello.bin hello.o
