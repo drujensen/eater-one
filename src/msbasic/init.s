@@ -406,7 +406,7 @@ QT_BYTES_FREE:
   .elseif .def(APPLE)
         .byte   0
   .else
-        .byte   CR,LF,CR,LF
+        .byte   CR,LF
   .endif
 QT_BASIC:
   .ifdef OSI
@@ -438,6 +438,6 @@ QT_BASIC:
     .else
         .byte   "COPYRIGHT 1977 BY MICROSOFT CO."
     .endif
-        .byte   CR,LF,0
+        .byte   0
   .endif
 .endif

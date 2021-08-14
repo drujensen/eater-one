@@ -64,7 +64,6 @@
 ; * Applesoft lite by Tom Greene http://cowgod.org/replica1/applesoft/ helped a lot, too.
 ; * Thanks to Joe Zbicak for help with Intellision Keyboard BASIC
 ; * This work is dedicated to the memory of my dear hacking pal Michael "acidity" Kollmann.
-
 .debuginfo +
 
 .setcpu "6502"
