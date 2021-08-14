@@ -33,7 +33,7 @@ RAMSTART2		:= $0300
 L0200           := $0200
 
 ; monitor functions
-;MONRDKEY        := $8009
+MONRDKEY        := $8009
 MONCOUT         := $8006
 ;MONISCNTC       := $FFF1
 ;LOAD            := $FFF4

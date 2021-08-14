@@ -6,5 +6,5 @@ ISCNTC:
         rts                     ; return
 L0ECC:
         lda     $7C01           ; get key data
-        cmp     #$83            ; is it Ctrl-C ?
+        cmp     #$1B            ; is it Ctrl-C ?
 ;!!! *used*to* run into "STOP"

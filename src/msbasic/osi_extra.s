@@ -10,11 +10,11 @@
   RestoreZeroPage = $9135
 
 ; Read key from keyboard.
-MONRDKEY:
-        LDA     $D011           ; keyboard status
-        BPL     MONRDKEY        ; branch until key pressed
-        LDA     $D010           ; keyboard data
-        RTS
+;MONRDKEY:
+;        LDA     $D011           ; keyboard status
+;        BPL     MONRDKEY        ; branch until key pressed
+;        LDA     $D010           ; keyboard data
+;        RTS
 
 ; Check for presence of CFFA1 by testing for two ID bytes
 CheckForCFFA1:
