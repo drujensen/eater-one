@@ -320,7 +320,7 @@ dxloop:
 .segment "BASIC"
 
 
-.segment "VECTORS"
+.segment "INTERRUPTS"
                 .word   $0F00
                 .word   reset
                 .word   $0000

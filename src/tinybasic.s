@@ -1334,6 +1334,8 @@ SNDCHR   sta $FE                    ; Save the character to be printed
          beq EXSC                   ;
          cmp #$0A                   ; Ignore line feed
          beq EXSC                   ;
+         cmp #ESC
+         beq EXSC
 
 GETSTS
          lda IFR                    ; Look for interrupt
