@@ -7,7 +7,7 @@ import serial
 import time
 
 val = b''
-ser = serial.Serial("/dev/tty.usbserial-1410", 9600)
+ser = serial.Serial("/dev/cu.usbserial-210", 9600)
 while val != b'>':
     val = ser.read()
 
