@@ -22,9 +22,15 @@ To run tinybasic from WozMon, type `9000R`
 
 You can find the user manual for TinyBasic here: [TinyBasic User Manual](http://www.ittybittycomputers.com/IttyBitty/TinyBasic/TBuserMan.htm)
 
+## MS Basic
+
+To run Microsoft Basic from Bill Gates, type `A000R`
+
+This will run the OSI 6502 BASIC Version 1.0 REV 3.2 from 1977
+
 ## Upload Utility
 
-A pyton script can be used to upload programs into memory using the Arduino Nano.  You can upload both Assembly Code to WozMon or Basic code to TinyBasic.   Example applications are provided.
+A pyhton script can be used to upload programs into memory using the Arduino Nano.  You can upload both Assembly Code to WozMon or Basic code to TinyBasic.   Example applications are provided.
 
 ## Hardware Modifications
 
@@ -36,7 +42,7 @@ This will detect when the address is $7CXX range and enable the controller.
 
 0111 | 11xx | xxxx | xxxx
  7   |  C   |  X   |  X
- 
+
 Remove the RAM Output Enable (OEb) connection to Address Pin 14 and connect it to Ground.  This removes the original restriction on memory to 16k at address MAX of $4000.  Because of the original design with enabling the RAM chip only on clock enabled, this seems to prevent any conflicts with the C6522 chip.
 
 Add 2 ATMega328p chips and connect the 8 input lines to one and 8 output lines to the other.  All communication is using ASCII.  Also, another pin is used to trigger an interrupt on the C6522 to inform when a key was pressed or the display is ready.
