@@ -1,6 +1,6 @@
 # Eater One
 
-Extensions to the Ben Eaters C6502 Breadboard to add a Keyboard and Display.
+Modifications to the Ben Eaters C6502 Breadboard to add a Keyboard and Display.
 
 ROM includes Wozmon by Steve Wozniak, TinyBasic by Tom Pittman and MS Basic by Bill Gates.
 
@@ -12,15 +12,19 @@ The Display is using an Arduino ATMega328p chip and TVOut library to composite v
 
 The Serial Interface is an Arduino Nano to provide access to the keyboard so you can upload programs into memory.
 
+![Eater One](/images/eater-one.jpeg)
+
 ## WozMon
 
-This is the original 256 bytes Woz Monitor application used on the Apple 1.  It has been slightly modified (and now larger than 256b) to use the Keyboard and Display hardware but same code and functionality.  This is loaded on reset.
+This is the original 256 bytes Woz Monitor application used on the Apple 1 and written by Steve Wozniak.  This in my opinion is one of the most amazing code that fit in 256b of memory.  Truly an amazing piece of software.  It has been slightly modified (a bit larger than 256b) to use the Keyboard and Display hardware but same code and functionality.  This is loaded on reset from address 8000.
 
 Here is a guide on how to use it: [WozMon Guide](https://www.sbprojects.net/projects/apple1/wozmon.php)
 
+![WozMon](/images/wozmon.jpeg)
+
 ## TinyBasic
 
-To run tinybasic from WozMon, type `9000 R`
+To run tinybasic from Tom Pittman, type `9000 R`
 
 You can find the user manual for TinyBasic here: [TinyBasic User Manual](http://www.ittybittycomputers.com/IttyBitty/TinyBasic/TBuserMan.htm)
 
@@ -31,6 +35,8 @@ To run Microsoft Basic from Bill Gates, type `A000 R`
 This will run the OSI 6502 BASIC Version 1.0 REV 3.2 from 1977
 
 This doesn't support any graphics.  It's similar to the Apple 1.  Sample games are included in the `examples` folder that were grabbed from Jeff Tanter's repository.
+
+![MS Basic](/images/basic.jpeg)
 
 ## Upload Utility
 
@@ -51,9 +57,17 @@ This will detect when the address is $7CXX range and enable the controller.
 
 Remove the RAM Output Enable (OEb) connection to Address Pin 14 and connect it to Ground.  This removes the original restriction on memory to 16k at address MAX of $4000.  Because of the original design with enabling the RAM chip only on clock enabled, this seems to prevent any conflicts with the C6522 chip.
 
+![AND-Gate](/images/and-gate.jpeg)
+
 Add 2 ATMega328p chips and connect the 8 input lines to one and 8 output lines to the other.  All communication is using ASCII.  Also, another pin is used to trigger an interrupt on the C6522 to inform when a key was pressed or the display is ready.
 
+![keyboard](/images/keyboard.jpeg)
+
+![monitor](/images/monitor.jpeg)
+
 Add an Arduino Nano and connect the pins D2 and D3 to the Keyboard Arduino pins D11 and D12.  This leverages SoftSerial library to deliver ascii from a laptop/desktop computer through the Nano, and to the keyboard.  It acts as if it was typing on the keyboard.
+
+![IO](/images/io.jpeg)
 
 You will find the 3 arduino projects for display, keyboard and io in the `arduino` folder.  You will need to burn these to the 2 chips for the keyboard and display.  The io sketch should be uploaded to the Arduino Nano.
 
