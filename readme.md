@@ -2,7 +2,7 @@
 
 Modifications to the Ben Eaters C6502 Breadboard to add a Keyboard and Monitor.  Also the ability to upload programs via a serial io port.
 
-ROM includes Wozmon by Steve Wozniak, TinyBasic by Tom Pittman and MS Basic by Bill Gates.
+ROM includes Wozmon by Steve Wozniak, TinyBasic by Tom Pittman and MS Basic by Richard Weiland.
 
 RAM has been expanded to support 31K.
 
@@ -24,7 +24,7 @@ Here is a guide on how to use it: [WozMon Guide](https://www.sbprojects.net/proj
 
 ## TinyBasic
 
-To run tinybasic from Tom Pittman, type `9000 R`
+To run Tiny Basic written by Tom Pittman, type `9000 R`
 
 You can find the user manual for TinyBasic here: [TinyBasic User Manual](http://www.ittybittycomputers.com/IttyBitty/TinyBasic/TBuserMan.htm)
 
@@ -32,7 +32,7 @@ You can find the user manual for TinyBasic here: [TinyBasic User Manual](http://
 
 ## MS Basic
 
-To run Microsoft Basic from Bill Gates, type `A000 R`
+To run Microsoft Basic written by Richard Weiland, type `A000 R`
 
 This will run the OSI 6502 BASIC Version 1.0 REV 3.2 from 1977
 
