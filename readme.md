@@ -28,6 +28,8 @@ To run tinybasic from Tom Pittman, type `9000 R`
 
 You can find the user manual for TinyBasic here: [TinyBasic User Manual](http://www.ittybittycomputers.com/IttyBitty/TinyBasic/TBuserMan.htm)
 
+![TinyBasic](/images/tiny-basic.jpeg)
+
 ## MS Basic
 
 To run Microsoft Basic from Bill Gates, type `A000 R`
