@@ -44,7 +44,7 @@ A python script can be used to upload programs into memory using the Arduino Nan
 
 ## Hardware Modifications
 
-the following hardare modifications were made to Ben Eaters Breadboard.
+The following hardware modifications were made to Ben Eaters Breadboard.
 
 Remove the IRQ interrupt wire from the C6522 to C6502.  We will poll the interrupt flag and reset it manually in the code, instead of leverage the Interrupt Vectors for both the Keyboard and Display.
 
