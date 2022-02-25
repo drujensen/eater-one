@@ -16,7 +16,7 @@ The Serial Interface is an Arduino Nano to provide access to the keyboard so you
 
 ## WozMon
 
-This is the original 256 bytes Woz Monitor application used on the Apple 1 and written by Steve Wozniak.  This in my opinion is one of the most amazing code that fit in 256b of memory.  Truly an amazing piece of software.  It has been slightly modified (a bit larger than 256b) to use the Keyboard and Display hardware but same code and functionality.  This is loaded on reset from address 8000.
+This is the original 256 byte Woz Monitor application used on the Apple 1 and written by Steve Wozniak.  This (in my opinion) is a historical master piece.  If code was art, I would put this up there with the Mona Lisa.  Truly an amazing piece of software.  It has been slightly modified (a bit larger than 256b) to use the Keyboard and Display hardware but same code and functionality.  This is loaded on reset from address 8000.
 
 Here is a guide on how to use it: [WozMon Guide](https://www.sbprojects.net/projects/apple1/wozmon.php)
 
