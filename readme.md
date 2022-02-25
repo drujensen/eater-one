@@ -1,6 +1,6 @@
 # Eater One
 
-Modifications to the Ben Eaters C6502 Breadboard to add a Keyboard and Display.
+Modifications to the Ben Eaters C6502 Breadboard to add a Keyboard and Monitor.  Also the ability to upload programs via a serial io port.
 
 ROM includes Wozmon by Steve Wozniak, TinyBasic by Tom Pittman and MS Basic by Bill Gates.
 
