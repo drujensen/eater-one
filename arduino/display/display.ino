@@ -20,7 +20,7 @@ void setup() {
 
   pinMode(LATCH, OUTPUT);
   digitalWrite(LATCH, HIGH);
-    
+
   TV.begin(_NTSC);
   TV.select_font(font6x8);
   TV.clear_screen();
@@ -50,7 +50,7 @@ void ready() {
   digitalWrite(LATCH, HIGH);
   digitalWrite(LATCH, LOW);
   delay(5);
-  digitalWrite(LATCH, HIGH);  
+  digitalWrite(LATCH, HIGH);
 }
 
 void loop() {
@@ -68,7 +68,7 @@ void loop() {
         TV.clear_screen();
         break;
       default:
-        TV.print(value);  
+        TV.print(value);
         break;
     }
   } else {
