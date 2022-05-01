@@ -2705,7 +2705,7 @@ Type65816String:
         .asciiz "65816"
 
 TypeSBCString:
-        .asciiz "EATERMON"
+        .asciiz "EATER ONE"
 
 SInvalidRecord:
         .asciiz "Invalid record"
