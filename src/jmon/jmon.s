@@ -662,7 +662,7 @@ Dump:
         INC SH
 @NoCarry:
         INX
-        CPX #12                 ; display 12 lines
+        CPX #07                 ; display 7 lines
         BNE @loop
         JSR PromptToContinue
         BCC @line
@@ -679,7 +679,7 @@ Unassemble:
         STX ADDR
         STY ADDR+1
 @line:  JSR PrintCR
-        LDA #12
+        LDA #07                 ; display 7 lines
 @loop:  PHA
         JSR DISASM              ; display line of output
         PLA

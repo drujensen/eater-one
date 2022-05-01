@@ -1,6 +1,15 @@
+// Wiring to program arduino with another arduino
+// 10 -> reset
+// 11 -> 11
+// 12 -> 12
+// 13 -> 13
+// GRD -> GRD
+// 5V -> 5V
+// reset -> Capacitor -> GRD
+
+#include <TVout.h>
 #include <fontALL.h>
 #include <video_gen.h>
-#include <TVout.h>
 #include <CircularBuffer.h>
 
 #define LATCH 10
@@ -18,11 +27,18 @@ void setup() {
   pinMode(6, INPUT);
   pinMode(8, INPUT);
 
+  //Font Select pin
+  pinMode(13, INPUT);
+
   pinMode(LATCH, OUTPUT);
   digitalWrite(LATCH, HIGH);
 
-  TV.begin(_NTSC);
-  TV.select_font(font6x8);
+  TV.begin(NTSC,120,96);
+  if (digitalRead(13)) {
+    TV.select_font(font4x6);
+  } else {
+    TV.select_font(font6x8);
+  }
   TV.clear_screen();
   TV.set_cursor(0,0);
 }
