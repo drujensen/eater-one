@@ -317,9 +317,6 @@ dxloop:
                 pla
                 rts
 
-.segment "BASIC"
-
-
 .segment "INTERRUPTS"
                 .word   $0F00
                 .word   reset

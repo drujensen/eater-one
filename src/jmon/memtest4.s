@@ -162,44 +162,9 @@ TESTDONE:                        ; print done and stop
         LDA        PASSES
         JSR        PrintByte
         JSR        PrintCR
-.if .defined(APPLE1)
-; Stop if key pressed
-        BIT        $D011 ; Keyboard CR
-        BMI        KeyPressed
-        JMP        REPEAT
-KeyPressed:
-        LDA        $D010 ; Keyboard data
-        JMP        FINISHED
-.elseif .defined(APPLE2)
-; Stop if key pressed
-        BIT        $C000 ; Keyboard register
-        BMI        KeyPressed
-        JMP        REPEAT
-KeyPressed:
-        STA        $C010 ; Clear keyboard strobe
-        JMP        FINISHED
-.elseif .defined(OSI)
-        LDA        #$00
-        STA        $DF00  ; Select all keyboard rows
-        LDA        $DF00  ; Read columns
-        ORA        #$01   ; Set bit for possible shift lock key
-        CMP        #$FF   ; All bits set means no key pressed
-        BNE        KeyPressed
-        JMP        REPEAT
-KeyPressed:
-        JMP        FINISHED
-.elseif .defined(KIM1)
-
-; Can't find any way to detect keypress on KIM-1 without blocking, so
-; just prompt user.
-        JSR        PromptToContinue
-        BCS        FINISHED           ; done
-        JMP        REPEAT             ; continue
-.elseif .defined(SBC)
         JSR        MONRDKEY
         BCS        FINISHED           ; done
         JMP        REPEAT             ; continue
-.endif
 
 ; OUTPUT THE ERROR INFO and STOP
 ; TEST#, ADDRESS, PATTERN, ERROR

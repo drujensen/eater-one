@@ -107,20 +107,7 @@
 MINIASM = 1
 
 .segment "JMON"
-
-.if .defined(APPLE1)
-    .out "Building for Apple 1/Replica 1"
-.elseif .defined(APPLE2)
-    .out "Building for Apple II"
-.elseif .defined(OSI)
-    .out "Building for Ohio Scientific Superboard"
-.elseif .defined(KIM1)
-    .out "Building for KIM-1"
-.elseif .defined(SBC)
-    .out "Building for SBC"
-.else
-    .error "Platform not defined"
-.endif
+.out "Building for EATERMON"
 
 ; Constants
   CR      = $0D                 ; Carriage Return
@@ -130,36 +117,12 @@ MINIASM = 1
   NUL     = $00                 ; Null
   bytesPerLine = $20            ; S record file bytes per line
 
-; Hardware addresses
-.ifdef APPLE1
-  KBD     = $D010               ; PIA.A keyboard input
-  KBDCR   = $D011               ; PIA.A keyboard control register
-  DSP     = $D012               ; PIA.B display output register
-.endif
-
 ; Page Zero locations
 ; Note: Woz Mon uses $24 through $2B and $0200 through $027F.
 ; Krusader uses $F8, $F9, $FE, $FF.
 ; Mini-monitor uses $0F, $10, $11, $E0-$E8, $F0-$F6.
 ; OSI monitor uses $FB, $FC, $FE, $FF.
 
-.ifdef APPLE2
-; Below were chosen to avoid locations used by Applesoft, Integer
-; BASIC, DOS, or ProDOS.
-  T1      = $06                 ; Temp variable 1 (2 bytes)
-  SL      = $08                 ; Start address low byte
-  SH      = $09                 ; Start address high byte
-  EL      = $19                 ; End address low byte
-  EH      = $1A                 ; End address high byte
-  DL      = $1B                 ; Destination address low byte
-  DH      = $1C                 ; Destination address high byte
-  ADDR    = $1D                 ; Instruction address, 2 bytes (low/high)
-  ADDRS   = $EB                 ; Memory test - 2 bytes - address of memory
-  TEST_PATRN = $1F              ; Memory test - 1 byte - current test pattern
-  PASSES  = $ED                 ; Memory test - number of passes
-  VECTOR  = $EE                 ; Holds adddress of IRQ/BREAK entry point (2 bytes)
-  BPA     = $F8                 ; Address of breakpoint (2 bytes * 4 breakpoints)
-.else
   T1      = $30                 ; Temp variable 1 (2 bytes)
   SL      = $32                 ; Start address low byte
   SH      = $33                 ; Start address high byte
@@ -175,67 +138,15 @@ MINIASM = 1
   BPA     = $40                 ; Address of breakpoint (2 bytes * 4 breakpoints)
   T3      = $48                 ; Temp variable 3 (1 byte)
   T4      = $49                 ; Temp variable 4 (2 bytes)
-.endif
 
 ; Non page zero locations
-.if .defined(APPLE1) .or .defined(APPLE2) .or .defined(KIM1) .or .defined(SBC)
   IN      = $0200               ; Buffer from $0200 through $027F
-.elseif .defined(OSI)
-  IN      = $0300               ; Buffer from $0300 through $037F
-.endif
-
-; External Routines
-.if .defined(APPLE1)
-  BASIC   = $E000               ; BASIC
-  WOZMON  = $FF00               ; Woz monitor entry point
-  MENU    = $9006               ; CFFA1 menu entry point
-  ACI     = $C100               ; ACI (Apple Cassette Interface) firmware entry point
-  ECHO    = 1                   ; Need to echo commands
-  BRKVECTOR = $FFFE             ; Break/interrupt vector (2 bytes)
-.elseif .defined(APPLE2)
-  BASIC   = $E000               ; BASIC (cold start)
-; BASIC   = $03D0               ; BASIC (cold start with DOS hooks)
-  MONITOR = $FF69               ; Apple monitor entry point
-  ECHO    = 1                   ; Need to echo commands
-  BRKVECTOR = $03F0             ; Break/interrupt vector (2 bytes)
-  BEEP    = $FBE4               ; Beep the speaker
-.elseif .defined(OSI)
-  BASIC   = $BD11               ; BASIC Cold Start
-  OSIMON  = $FE00               ; OSI monitor entry point
-  ECHO    = 1                   ; Need to echo commands
-  BRKVECTOR = $FFFE             ; Break/interrupt vector (2 bytes)
-.elseif .defined(KIM1)
-  KIMMON  = $1C00               ; KIM monitor entry point
-  BRKVECTOR = $17FE             ; Break/interrupt vector (2 bytes)
-; Note: ECHO not defined because KIM-1 always echoes characters back.
-.elseif .defined(SBC)
+  MONITOR = $8000               ; WozMon routine
   BASIC   = $C000               ; BASIC Cold Start
   ECHO    = 1                   ; Need to echo commands
   BRKVECTOR = $FFFE             ; Break/interrupt vector (2 bytes)
   MONCOUT = $8006               ; Console out routine
   MONRDKEY = $8009              ; Console in routine
-.endif
-
-; Start address.
-.if .defined(APPLE1)
-; $0280 works well for running out of RAM. Use start address of $A000 for Multi I/0 Board EEPROM
-; .org $A000
-  .org $0280
-.elseif .defined(APPLE2)
-; $0800 should work for DOS 3.3 but conflict with Applesoft.
-; $2000 should work but conflict with ProDOS.
-; $6000 should work with ProDOS, need to first do HIMEM:24575 from Applesoft.
-; .org $0800
-; .org $2000
-  .org $6000
-.elseif .defined(OSI)
-  .org $0380
-.elseif .defined(KIM1)
-  .org $2000
-.elseif .defined(SBC)
-; .org $2000                    ; For running out of RAM
-  .org $9000                    ; For running from ROM
-.endif
 
 ; JMON Entry point
   .export JMON
@@ -270,11 +181,7 @@ JMON:
 MainLoop:
 ; Display prompt
         JSR Imprint
-.if .defined(APPLE1) .or .defined(APPLE2) .or .defined(KIM1) .or .defined(SBC)
         .asciiz "? "
-.elseif .defined(OSI)
-        .asciiz "?"     ; Smaller on OSI due to smaller screen
-.endif
 
 ; Get first character of command
         JSR GetKey
@@ -289,11 +196,7 @@ Invalid:
         JSR BEEP
 .endif
         JSR Imprint
-.if .defined(APPLE1) .or .defined(APPLE2) .or .defined(KIM1) .or .defined(SBC)
-        .byte "Invalid command. Type '?' for help", CR, 0
-.elseif .defined(OSI)
         .byte "Invalid command.", CR, "Type '?' for help", CR, 0
-.endif
         RTS
 
 ; Display help
@@ -308,63 +211,9 @@ Help:
         LDY #>HelpString
         JMP PrintString         ; Return via caller
 
-; Call CFFA1 flash interface menu
-
-.ifdef APPLE1
-CFFA1:
-        JSR CFFA1Present        ; Is the card present?
-        BEQ @NoCFFA1
-        JMP MENU                ; Jump to CFFA1 menu, will return when done.
-
-@NoCFFA1:
-.ifdef BEEP
-        JSR BEEP
-.endif
-; Display error that no CFFA1 is present.
-        JSR Imprint
-        .byte "No CFFA1 card found!", CR, 0
-        RTS
-.endif
-
-; Call ACI (Apple Cassette Interface) firmware
-; First check for the presence of the card by looking for the first two byes of the ROM firmware.
-
-.ifdef APPLE1
-ACIFW:
-        JSR ACIPresent
-        BEQ NoACI
-        JMP ACI                 ; Jump to ACI firmware, unfortunately jumps to Woz Mon when done rather than returning here.
-NoACI:
-.ifdef BEEP
-        JSR BEEP
-.endif
-                                ; Display error that no ACI is present.
-        JSR Imprint
-        .byte "No ACI card found!", CR, 0
-        RTS
-.endif
-
 ; Go to Woz Monitor, OSI Monitor, or KIM-1 Monitor.
 Monitor:
-.if .defined(APPLE1)
-        JSR WozMonPresent
-        BEQ @NoWozMon
-        JMP WOZMON
-@NoWozMon:
-.ifdef BEEP
-        JSR BEEP
-.endif
-                                ; Display error that no Woz Monitor is present.
-        JSR Imprint
-        .byte "Woz Mon not found!", CR, 0
-        RTS
-.elseif .defined(APPLE2)
         JMP MONITOR             ; Assume it is always present
-.elseif .defined(OSI)
-        JMP OSIMON              ; Jump into OSI Monitor
-.elseif .defined(KIM1)
-        JMP KIMMON              ; Jump into KIM Monitor
-.endif
 
 ; Go to Mini Assembler
 .ifdef MINIASM
@@ -381,19 +230,8 @@ Assemble:
 .endif
 
 ; Go to BASIC
-.if .defined(APPLE1) .or .defined(APPLE2) .or .defined(OSI) .or .defined(SBC)
 Basic:
-        JSR BASICPresent        ; Is BASIC ROM present?
-        BEQ NoBasic
         JMP BASIC               ; Jump to BASIC (no facility to return).
-NoBasic:
-.ifdef BEEP
-        JSR BEEP
-.endif
-        JSR Imprint             ; Display error that no BASIC is present.
-        .byte "BASIC not found!", CR, 0
-        RTS
-.endif
 
 ; Handle breakpoint
 ; B ?                    <- list status of all breakpoints
@@ -802,18 +640,7 @@ Verify:
         JMP @verify
 
 ; Dump Memory
-
-.if .defined(APPLE1)
-        BYTESPERLINE = 8
-.elseif .defined(APPLE2)
-        BYTESPERLINE = 8
-.elseif .defined(OSI)
         BYTESPERLINE = 4
-.elseif .defined(KIM1)
-        BYTESPERLINE = 16
-.elseif .defined(SBC)
-        BYTESPERLINE = 16
-.endif
 
 Dump:
 ; echo 'D' and space, wait for start address
@@ -835,7 +662,7 @@ Dump:
         INC SH
 @NoCarry:
         INX
-        CPX #23                 ; display 23 lines
+        CPX #12                 ; display 12 lines
         BNE @loop
         JSR PromptToContinue
         BCC @line
@@ -852,7 +679,7 @@ Unassemble:
         STX ADDR
         STY ADDR+1
 @line:  JSR PrintCR
-        LDA #23
+        LDA #12
 @loop:  PHA
         JSR DISASM              ; display line of output
         PLA
@@ -878,11 +705,7 @@ Test:
         STY END+1
         JSR PrintCR
         JSR Imprint
-.if .defined(APPLE1) .or .defined(APPLE2) .or .defined(KIM1) .or .defined(SBC)
-        .asciiz "Testing memory from $"
-.elseif .defined(OSI)
         .byte "Testing memory from", CR, "$", 0
-.endif
         LDX START
         LDY START+1
         JSR PrintAddress
@@ -949,11 +772,6 @@ Fill:
 
 ; Do setup so we can support breakpoints
 BPSETUP:
-.if .defined(APPLE1) .or .defined(OSI) .or .defined(SBC)
-
-; On the Apple 1 and OSI platforms the BRK vector is in RAM and we
-; write a JMP instruction to our handler there.
-
         LDA BRKVECTOR           ; get address of BRK vector
         STA VECTOR              ; and save in page zero
         LDA BRKVECTOR+1
@@ -970,18 +788,6 @@ BPSETUP:
         INY
         STA (VECTOR),Y          ; write it after JMP
 
-.elseif .defined(KIM1) .or .defined(APPLE2) .or .defined(SBC)
-
-; On the KIM-1 and Apple II, the BRK vector is in ROM but the handler
-; goes through a vector in RAM.
-
-        LDA #<BRKHANDLER        ; handler address low byte
-        STA BRKVECTOR
-        CMP BRKVECTOR           ; if we don't read back what we wrote
-        BNE VNOTINRAM           ; ...then vector address is not writable (shouldn't happen, but...)
-        LDA #>BRKHANDLER        ; handler address high byte
-        STA BRKVECTOR+1
-.endif
         LDA #0                  ; Mark all breakpoints as cleared (BPA and BPD set to 0)
         LDX #0
         LDY #0
@@ -1105,31 +911,6 @@ OK:
 
 ; Breakpoint handler
 BRKHANDLER:
-.if .defined(APPLE2)
-
-; On the Apple II platform the ROM interrupt handler has already
-; determined that a BRK intruction was executed and has saved the
-; register values in RAM.
-
-        SEC                     ; subtract 2 from return address to get actual instruction address
-        LDA $3A
-        SBC #2
-        STA SAVE_PC             ; PC low
-        LDA $3B
-        SBC #0
-        STA SAVE_PC+1           ; PC high
-        LDA $45
-        STA SAVE_A              ; A
-        LDA $46
-        STA SAVE_X              ; X
-        LDA $47
-        STA SAVE_Y              ; Y
-        LDA $48
-        STA SAVE_P              ; P
-        JMP CHECKADDR
-
-.else
-
 ; On other platforms, save registers. Then look at processor status to
 ; see if it was BRK or an IRQ. If IRQ, display a message and return
 ; from interrupt. Otherwise handle as a BRK statement.
@@ -1161,7 +942,6 @@ BREAK:
         SBC #0
         STA $0103,X
         STA SAVE_PC+1
-.endif
         LDX #0
 CHECKADDR:
         LDA SAVE_PC             ; see if PC matches address of a breakpoint
@@ -2088,36 +1868,8 @@ DumpLine:
 ; Clears high bit to be valid ASCII
 ; Registers changed: A
 GetKey:
-.if .defined(APPLE1)
-        LDA KBDCR               ; Read keyboard control register
-        BPL GetKey              ; Loop until key pressed (bit 7 goes high)
-        LDA KBD                 ; Get keyboard data
-        AND #%01111111          ; Clear most significant bit to convert to standard ASCII
-        RTS
-.elseif .defined(APPLE2)
-        LDA $C000               ; Read keyboard register
-        BPL GetKey              ; Loop until key pressed (bit 7 goes high)
-        AND #%01111111          ; Clear most significant bit to convert to standard ASCII
-        PHA
-        LDA $C010               ; Clear keyboard strobe
-        PLA
-        RTS
-.elseif .defined(OSI)
-        JMP $FD00               ; Call OSI keyboard input routine
-;       JMP $FE80               ; Call OSI serial input routine
-.elseif .defined(KIM1)
-        TYA                     ; Save Y on stack
-        PHA
-        JSR $1E5A               ; Call KIM GETCH routine. Returns char in A. Changes Y.
-        STA T3                  ; Save A
-        PLA                     ; Restore Y from stack
-        TAY
-        LDA T3                  ; Restore A
-        RTS
-.elseif .defined(SBC)
         JSR MONRDKEY
         RTS
-.endif
 
 ; Gets a hex digit (0-9,A-F). Echoes character as typed.
 ; ESC key cancels command and goes back to command loop.
@@ -2460,65 +2212,6 @@ PRHEX:
 ; Pass byte in A
 ; Registers changed: none
 PrintChar:
-.if .defined(APPLE1)
-                        ; Based on Woz Monitor ECHO routine ($FFEF).
-        PHP             ; Save status
-        PHA             ; Save A as it may be changed
-@Loop:
-        BIT DSP         ; bit (B7) cleared yet?
-        BMI @Loop       ; No, wait for display.
-
-; If option is set, convert lower case character to upper case
-
-        BIT OUPPER      ; Check value of option
-        BPL @NotLower   ; Skip conversion if not set
-        JSR ToUpper
-@NotLower:
-        STA DSP         ; Output character. Sets DA.
-        PLA             ; Restore A
-        PLP             ; Restore status
-        RTS             ; Return.
-
-.elseif .defined(APPLE2)
-        PHP             ; Save status
-        PHA             ; Save A as it may be changed
-        ORA #%10000000  ; Make sure high bit is set
-        JSR $FDF0       ; Apple II COUT1
-        PLA             ; Restore A
-        PLP             ; Restore status
-        RTS             ; Return
-
-.elseif .defined(OSI)
-        PHP             ; Save status
-        PHA             ; Save A as it may be changed
-        JSR $BF2D       ; Call OSI screen character out routine
-;       JSR $FCB1       ; Call OSI serial character out routine
-        CMP #CR         ; Is it Return?
-        BNE @ret        ; If not, return
-        LDA #LF
-        JSR $BF2D       ; Else print Linefeed too (screen)
-;       JSR $FCB1       ; Else print Linefeed too (serial)
-@ret:
-        PLA             ; Restore A
-        PLP             ; Restore status
-        RTS             ; Return.
-
-.elseif .defined(KIM1)
-
-        PHP             ; Save status
-        STA     T3      ; Save A
-        TYA             ; Save Y
-        PHA
-        LDA     T3      ; Get A back
-        JSR     $1EA0   ; Call monitor OUTCH character out routine. Changes A and Y.
-        PLA             ; Restore Y
-        TAY
-        LDA     T3      ; Restore A
-        PLP             ; Restore status
-        RTS             ; Return.
-
-.elseif .defined(SBC)
-
         PHP             ; Save status
         PHA             ; Save A as it may be changed
         JSR MONCOUT
@@ -2531,7 +2224,6 @@ PrintChar:
         PLP             ; Restore status
         RTS             ; Return.
 
-.endif
 
 ; Print a dollar sign
 ; Registers changed: None
@@ -2647,11 +2339,7 @@ PromptToContinue:
         TYA
         PHA
         JSR Imprint
-.if .defined(APPLE1) .or .defined(APPLE2) .or .defined(KIM1) .or .defined(SBC)
-        .asciiz "  <Space> to continue, <ESC> to stop"
-.elseif .defined(OSI)
         .asciiz " <SP> cont <ESC> stop"
-.endif
 @SpaceOrEscape:
         JSR GetKey
         CMP #' '
@@ -2697,11 +2385,7 @@ RequireStartNotAfterEnd:
         JSR BEEP
 .endif
         JSR Imprint
-.if .defined(APPLE1) .or .defined(APPLE2) .or .defined(KIM1) .or .defined(SBC)
-        .byte "Error: start must be <= end", CR, 0
-.elseif .defined(OSI)
         .byte "Start must be <= end!", CR, 0
-.endif
         SEC
         RTS
 @rangeOkay:
@@ -2739,37 +2423,11 @@ GOTMCH: INX                     ; Makes zero a miss
         MATCHN = JMPFL-MATCHFL-1
 
 MATCHFL:
-.if .defined(APPLE1)
-        .byte "$?"
-.ifdef MINIASM
-        .byte "A"
-.endif
-        .byte "BCDEFGHIJKLMNOPRSTUVW:=."
-.elseif .defined(APPLE2)
         .byte "$?"
 .ifdef MINIASM
         .byte "A"
 .endif
         .byte "BCDFGHIJKLNOPRSTUVW:=."
-.elseif .defined(OSI)
-        .byte "$?"
-.ifdef MINIASM
-        .byte "A"
-.endif
-        .byte "BCDFGHIJKLNOPRSTUVW:=."
-.elseif .defined(KIM1)
-        .byte "$?"
-.ifdef MINIASM
-        .byte "A"
-.endif
-        .byte "BCDFGHJKLNOPRSTUVW:=."
-.elseif .defined(SBC)
-        .byte "$?"
-.ifdef MINIASM
-        .byte "A"
-.endif
-        .byte "BCDFGHIJKLNOPRSTUVW:=."
-.endif
 
 JMPFL:
         .word Invalid-1
@@ -2781,21 +2439,13 @@ JMPFL:
         .word Breakpoint-1
         .word Copy-1
         .word Dump-1
-.ifdef APPLE1
-        .word ACIFW-1
-.endif
         .word Fill-1
         .word Go-1
         .word Hex-1
-.if .defined(APPLE1) .or .defined(APPLE2) .or .defined(OSI) .or .defined(SBC)
         .word Basic-1
-.endif
         .word Load-1
         .word Checksum-1
         .word ClearScreen-1
-.ifdef APPLE1
-        .word CFFA1-1
-.endif
         .word Info-1
         .word Options-1
         .word ScopeLoop-1
@@ -2954,40 +2604,6 @@ P1:     LDX #7
 ; Clear screen (platform dependent).
 ; Registers changed: none
 ClearScreen:
-.if .defined(APPLE1)
-; Clear screen by printing 24 carriage returns.
-        PHA             ; save A
-        TXA             ; save X
-        PHA
-        LDA #CR
-        LDX #24
-        JSR PrintChars
-        PLA             ; restore X
-        TAX
-        PLA             ; restore A
-        RTS
-.elseif .defined(APPLE2)
-        JMP $FC58       ; Apple II HOME
-.elseif .defined(OSI)
-; Clear screen by writing spaces to all video memory.
-        PHA             ; save A
-        TXA             ; save X
-        PHA
-        LDX #$FF
-        LDA #' '
-CLR1:   STA $D000,X
-        STA $D100,X
-        STA $D200,X
-        STA $D300,X
-        DEX
-        BNE CLR1
-        LDA #$65        ; Set cursor position to home
-        STA $0200
-        PLA             ; restore X
-        TAX
-        PLA             ; restore A
-        RTS
-.elseif .defined(KIM1) .or .defined(SBC)
 ; Clear screen by printing 40 carriage returns.
         PHA             ; save A
         TXA             ; save X
@@ -2999,192 +2615,16 @@ CLR1:   STA $D000,X
         TAX
         PLA             ; restore A
         RTS
-.endif
 
-; Determines if an ACI (Apple Cassette Interface) card is present.
-; Reads the first two bytes of the ROM.
-; Returns in A 1 if present, 0 if not.
-.ifdef APPLE1
-ACIPresent:
-        LDA ACI                 ; First firmware byte
-        CMP #$A9                ; Should contain $A9
-        BNE @NoACI
-        LDA ACI+1               ; Second firmware byte
-        CMP #$AA                ; Should contain $AA
-        BNE @NoACI
-        LDA #1
-        RTS
-@NoACI:
-        LDA #0
-        RTS
-.endif
-
-; Determines if a CFFA1 (Compact Flash) card is present.
-; Returns in A 1 if present, 0 if not.
-; The documented way to check for a CFFA1 is to check for two ID bytes.
-; The documentation says it is addresses $AFFC and $AFFD but the firmware
-; actually uses addresses $AFDC and $AFDD. Further, my CFFA1 board did
-; not have these locations programmed even though firmware on CD-ROM did.
-; I manually wrote these bytes to my EEPROM.
-
-.ifdef APPLE1
-CFFA1Present:
-        LDA $AFDC               ; First CFFA1 ID byte
-        CMP #$CF                ; Should contain $CF
-        BNE @NoCFFA1
-        LDA $AFDD               ; First CFFA1 ID byte
-        CMP #$FA                ; Should contain $FA
-        BNE @NoCFFA1
-        LDA #1
-        RTS
-@NoCFFA1:
-        LDA #0
-        RTS
-.endif
-
-; Determines if a Replica 1 Multi I/O card is present.
-; Returns in A 1 if present, 0 if not.
-; Method is to check the first few 6551 and 6522 registers.
-; This may need some tweaking to work reliably.
-; 6522 checks may only work after a hardware reset.
-;
-; To test for the 6551:
-; Write $00 to $C302, should read back
-; Write $FF to $C302, should read back
-; Write $00 to $C303, should read back
-; Write $FF to $C303, should read back
-; Write $XX to $C301 for programmed reset
-; $C301 should read XXXXX0XX
-; $C302 should read XXX00000
-; To test for the 6522:
-; Write $FF to $C202, should read back
-; Write $00 to $C202, should read back
-; Write $FF to $C203, should read back
-; Write $00 to $C203, should read back
-; Write $AA to $C201, should read back different
-; Write $AA to $C200, should read back different
-; Read $C204 (timer). Read again and data should be different.
-
-.ifdef APPLE1
-MultiIOPresent:
-        LDA #$00
-        STA $C302
-        CMP $C302
-        BNE @NoMultiIO
-        LDA #$FF
-        STA $C302
-        CMP $C302
-        BNE @NoMultiIO
-        LDA #$00
-        STA $C303
-        CMP $C303
-        BNE @NoMultiIO
-        LDA #$FF
-        STA $C303
-        CMP $C303
-        BNE @NoMultiIO
-        STA $C301
-        LDA $C301
-        AND #%00000100
-        CMP #$00
-        BNE @NoMultiIO
-        LDA $C302
-        AND #%00011111
-        CMP #$00
-        BNE @NoMultiIO
-
-        LDA #$FF
-        STA $C202
-        CMP $C202
-        BNE @NoMultiIO
-        LDA #$00
-        STA $C202
-        CMP $C202
-        BNE @NoMultiIO
-        LDA #$FF
-        STA $C203
-        CMP $C203
-        BNE @NoMultiIO
-        LDA #$00
-        STA $C203
-        CMP $C203
-        BNE @NoMultiIO
-        LDA #$AA
-        STA $C201
-        CMP $C201
-        BEQ @NoMultiIO
-        LDA #$AA
-        STA $C200
-        CMP $C200
-        BEQ @NoMultiIO
-        LDA $C204
-        CMP $C204
-        BEQ @NoMultiIO
-        LDA #1
-        RTS
-@NoMultiIO:
-        LDA #0
-        RTS
-.endif
-
-; Determines if an Apple II serial port is is present.
-; Returns in A 1 if present, 0 if not.
-; Method is to check the first few 6551 registers.
-.ifdef APPLE2
-SerialPresent:
-        LDA #$00
-        STA $C09A
-        CMP $C09A
-        BNE @NoSerial
-        LDA #$FF
-        STA $C09A
-        CMP $C09A
-        BNE @NoSerial
-        LDA #$00
-        STA $C09B
-        CMP $C09B
-        BNE @NoSerial
-        LDA #$FF
-        STA $C09B
-        CMP $C09B
-        BNE @NoSerial
-        STA $C099
-        LDA $C099
-        AND #%00000100
-        CMP #$00
-        BNE @NoSerial
-        LDA $C09A
-        AND #%00011111
-        CMP #$00
-        BNE @NoSerial
-        LDA #1
-        RTS
-@NoSerial:
-        LDA #0
-        RTS
-
-.endif
 
 ; Determines if BASIC ROM is present.
 ; Returns in A 1 if present, 0 if not.
 ; Looks for the first three bytes of ROM.
 ; It is unlikely but it could possibly not be present (e.g. when running in an Emulator)
 
-.if .defined(APPLE1)
-  BASIC0 = $4C
-  BASIC1 = $B0
-  BASIC2 = $E2
-.elseif .defined(APPLE2)
-  BASIC0 = $4C
-  BASIC1 = $28
-  BASIC2 = $F1
-.elseif .defined(OSI) .or .defined(SBC)
   BASIC0 = $A2
   BASIC1 = $FF
   BASIC2 = $86
-.endif
-
-.if .defined(APPLE1) .or .defined(APPLE2) .or .defined(OSI) .or .defined(SBC)
 
 BASICPresent:
         LDA BASIC               ; First firmware byte
@@ -3202,46 +2642,6 @@ BASICPresent:
         LDA #0
         RTS
 
-.endif
-
-; Determines if Krusader ROM present.
-; Returns in A 1 if present, 0 if not.
-; Looks for the first thee bytes of ROM.
-.ifdef APPLE1
-KrusaderPresent:
-        LDA $F000
-        CMP #$A9
-        BNE @NoKrusader
-        LDA $F001
-        CMP #$03
-        BNE @NoKrusader
-        LDA $F002
-        CMP #$85
-        BNE @NoKrusader
-   LDA #1
-        RTS
-@NoKrusader:
-        LDA #0
-        RTS
-.endif
-
-; Determines if Woz Mon is present.
-; Returns in A 1 if present, 0 if not.
-; Looks for the first two bytes of ROM.
-.ifdef APPLE1
-WozMonPresent:
-        LDA WOZMON
-        CMP #$D8
-        BNE @NoWozMon
-        LDA WOZMON+1
-        CMP #$58
-        BNE @NoWozMon
-        LDA #1
-        RTS
-@NoWozMon:
-        LDA #1
-        RTS
-.endif
 
 ; Convert A to uppercase if it is a lowercase letter.
 ToUpper:
@@ -3256,76 +2656,10 @@ ToUpper:
 ; Strings
 
 WelcomeMessage:
-.if .defined(APPLE1) .or .defined(APPLE2) .or .defined(KIM1) .or .defined(SBC)
-        .byte CR,"JMON Monitor 1.3.7 by Jeff Tranter", CR, 0
-.elseif .defined(OSI)
         .byte CR,"JMON 1.3.7 by J. Tranter", CR, 0
-.endif
 
 ; Help string.
 HelpString:
-.if .defined(APPLE1)
-.ifdef MINIASM
-        .byte "Assemble    A <address>", CR
-.endif
-        .byte "Breakpoint  B <n or ?> <address>", CR
-        .byte "Copy        C <start> <end> <dest>", CR
-        .byte "Dump        D <start>", CR
-        .byte "ACI menu    E", CR
-        .byte "Fill        F <start> <end> <data>...", CR
-        .byte "Go          G <address>", CR
-        .byte "Hex to dec  H <address>", CR
-        .byte "BASIC       I", CR
-        .byte "Load S rec  J", CR
-        .byte "Checksum    K <start> <end>",CR
-        .byte "Clr screen  L", CR
-        .byte "CFFA1 menu  M", CR
-        .byte "Info        N", CR
-        .byte "Options     O", CR
-        .byte "Loop        P <address>",CR
-        .byte "Registers   R", CR
-        .byte "Search      S <start> <end> <data>...", CR
-        .byte "Test        T <start> <end>", CR
-        .byte "Unassemble  U <start>", CR
-        .byte "Verify      V <start> <end> <dest>", CR
-        .byte "Write S rec W <start> <end> <go>",CR
-        .byte "Woz mon     $", CR
-        .byte "Write       : <address> <data>...", CR
-        .byte "Math        = <address> +/- <address>", CR
-        .byte "Trace       .", CR
-        .byte "Help        ?", CR
-        .byte 0
-.elseif .defined(APPLE2)
-.ifdef MINIASM
-        .byte "Assemble    A <address>", CR
-.endif
-        .byte "Breakpoint  B <n or ?> <address>", CR
-        .byte "Copy        C <start> <end> <dest>", CR
-        .byte "Dump        D <start>", CR
-        .byte "Fill        F <start> <end> <data>...", CR
-        .byte "Go          G <address>", CR
-        .byte "Hex to dec  H <address>", CR
-        .byte "BASIC       I", CR
-        .byte "Load S rec  J", CR
-        .byte "Checksum    K <start> <end>",CR
-        .byte "Clr screen  L", CR
-        .byte "Info        N", CR
-        .byte "Options     O", CR
-        .byte "Loop        P <address>",CR
-        .byte "Registers   R", CR
-        .byte "Search      S <start> <end> <data>...", CR
-        .byte "Test        T <start> <end>", CR
-        .byte "Unassemble  U <start>", CR
-        .byte "Verify      V <start> <end> <dest>", CR
-        .byte "Write S rec W <start> <end> <go>",CR
-        .byte "Monitor     $", CR
-        .byte "Write       : <address> <data>...", CR
-        .byte "Math        = <address> +/- <address>", CR
-        .byte "Trace       .", CR
-        .byte "Help        ?", CR
-        .byte 0
-
-.elseif .defined(OSI)
 .ifdef MINIASM
         .byte "Assemble   A <a>", CR
 .endif
@@ -3355,65 +2689,6 @@ HelpString:
         .byte "Help       ?", CR
         .byte 0
 
-.elseif .defined(KIM1)
-.ifdef MINIASM
-        .byte "Assemble    A <address>", CR
-.endif
-        .byte "Breakpoint  B <n or ?> <address>", CR
-        .byte "Copy        C <start> <end> <dest>", CR
-        .byte "Dump        D <start>", CR
-        .byte "Fill        F <start> <end> <data>...", CR
-        .byte "Go          G <address>", CR
-        .byte "Hex to dec  H <address>", CR
-        .byte "Load S rec  J", CR
-        .byte "Checksum    K <start> <end>",CR
-        .byte "Clr screen  L", CR
-        .byte "Info        N", CR
-        .byte "Options     O", CR
-        .byte "Loop        P <address>",CR
-        .byte "Registers   R", CR
-        .byte "Search      S <start> <end> <data>...", CR
-        .byte "Test        T <start> <end>", CR
-        .byte "Unassemble  U <start>", CR
-        .byte "Verify      V <start> <end> <dest>", CR
-        .byte "Write S rec W <start> <end> <go>",CR
-        .byte "Monitor     $", CR
-        .byte "Write       : <address> <data>...", CR
-        .byte "Math        = <address> +/- <address>", CR
-        .byte "Trace       .", CR
-        .byte "Help        ?", CR
-        .byte 0
-
-.elseif .defined(SBC)
-.ifdef MINIASM
-        .byte "Assemble    A <address>", CR
-.endif
-        .byte "Breakpoint  B <n or ?> <address>", CR
-        .byte "Copy        C <start> <end> <dest>", CR
-        .byte "Dump        D <start>", CR
-        .byte "Fill        F <start> <end> <data>...", CR
-        .byte "Go          G <address>", CR
-        .byte "Hex to dec  H <address>", CR
-        .byte "BASIC       I", CR
-        .byte "Load S rec  J", CR
-        .byte "Checksum    K <start> <end>",CR
-        .byte "Clr screen  L", CR
-        .byte "Info        N", CR
-        .byte "Options     O", CR
-        .byte "Loop        P <address>",CR
-        .byte "Registers   R", CR
-        .byte "Search      S <start> <end> <data>...", CR
-        .byte "Test        T <start> <end>", CR
-        .byte "Unassemble  U <start>", CR
-        .byte "Verify      V <start> <end> <dest>", CR
-        .byte "Write S rec W <start> <end> <go>",CR
-        .byte "Write       : <address> <data>...", CR
-        .byte "Math        = <address> +/- <address>", CR
-        .byte "Trace       .", CR
-        .byte "Help        ?", CR
-        .byte 0
-.endif
-
 KnownBPString1:
   .asciiz "Breakpoint "
 
@@ -3429,29 +2704,8 @@ Type65C02String:
 Type65816String:
         .asciiz "65816"
 
-.if .defined(APPLE1)
-TypeApple1String:
-.elseif .defined(APPLE2)
-TypeAppleIIString:
-        .asciiz "Apple II"
-TypeAppleIIplusString:
-        .asciiz "Apple II+"
-TypeAppleIIeString:
-        .asciiz "Apple //e"
-TypeAppleIIcString:
-        .asciiz "Apple //c"
-TypeAppleUnknown:
-        .asciiz "Unknown"
-.elseif .defined(KIM1)
-TypeKim1String:
-        .asciiz "KIM-1"
-.elseif .defined(OSI)
-TypeOSIString:
-        .asciiz "OSI"
-.elseif .defined(SBC)
 TypeSBCString:
-        .asciiz "SBC"
-.endif
+        .asciiz "EATERMON"
 
 SInvalidRecord:
         .asciiz "Invalid record"
@@ -3515,9 +2769,6 @@ OPERAND:   .res 2               ; Holds any operands for assembled instruction
 .endif
 TRACEINST: .res 8               ; buffer holding traced instruction followed by a JMP and optionally another jump (Up to 8 bytes)
 TAKEN:     .res 1               ; Flag indicating if a traced branch instruction was taken
-.if .defined(APPLE2)
-SLOT:      .res 1               ; Holds current peripheral card slot number
-.endif
 XSAV2:     .res 1               ; Saved registers
 YSAV2:     .res 1
 ASAV2:     .res 1

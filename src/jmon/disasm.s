@@ -302,17 +302,9 @@ PRADDR:
   LDY ADDR+1
   .ifndef SOURCEONLY
   JSR PrintAddress      ; print address
-.if .defined(APPLE1) .or .defined(APPLE2) .or .defined(KIM1) .or .defined(SBC)
-  LDX #3
-  JSR PrintSpaces       ; then three spaces
-.elseif .defined(OSI)
   JSR PrintSpace
-.endif
   LDA OPCODE            ; get instruction op code
   JSR PrintByte         ; display the opcode byte
-.if .defined(APPLE1) .or .defined(APPLE2) .or .defined(KIM1) .or .defined(SBC)
-  JSR PrintSpace
-.endif
   LDA LEN               ; how many bytes in the instruction?
   CMP #4
   BEQ FOUR
@@ -320,31 +312,20 @@ PRADDR:
   BEQ THREE
   CMP #2
   BEQ TWO
-.if .defined(APPLE1) .or .defined(APPLE2) .or .defined(KIM1) .or .defined(SBC)
-  LDX #5
-.elseif .defined(OSI)
   LDX #4
-.endif
   JSR PrintSpaces
   JMP ONE
 TWO:
   LDY #1
   LDA (ADDR),Y          ; get 1st operand byte
   JSR PrintByte         ; display it
-.if .defined(APPLE1) .or .defined(APPLE2) .or .defined(KIM1) .or .defined(SBC)
-  LDX #3
-.elseif .defined(OSI)
   LDX #2
-.endif
   JSR PrintSpaces
   JMP ONE
 THREE:
   LDY #1
   LDA (ADDR),Y          ; get 1st operand byte
   JSR PrintByte         ; display it
-.if .defined(APPLE1) .or .defined(APPLE2) .or .defined(KIM1) .or .defined(SBC)
-  JSR PrintSpace
-.endif
   LDY #2
   LDA (ADDR),Y          ; get 2nd operand byte
   JSR PrintByte         ; display it
@@ -353,15 +334,9 @@ FOUR:
   LDY #1
   LDA (ADDR),Y          ; get 1st operand byte
   JSR PrintByte         ; display it
-.if .defined(APPLE1) .or .defined(APPLE2) .or .defined(KIM1) .or .defined(SBC)
-  JSR PrintSpace
-.endif
   LDY #2
   LDA (ADDR),Y          ; get 2nd operand byte
   JSR PrintByte         ; display it
-.if .defined(APPLE1) .or .defined(APPLE2) .or .defined(KIM1) .or .defined(SBC)
-  JSR PrintSpace
-.endif
   LDY #3
   LDA (ADDR),Y          ; get 3nd operand byte
   JSR PrintByte         ; display it
@@ -369,11 +344,7 @@ FOUR:
   BNE SPC
 ONE:
   .endif                ; .ifndef SOURCEONLY
-.if .defined(APPLE1) .or .defined(APPLE2) .or .defined(KIM1) .or .defined(SBC)
-  LDX #4
-.elseif .defined(OSI)
   LDX #1
-.endif
 SPC:
   JSR PrintSpaces
   LDA OP                ; get the op code
@@ -421,11 +392,7 @@ DOMB:
   LSR
   LSR
   JSR PRHEX
-.if .defined(APPLE1) .or .defined(APPLE2) .or .defined(KIM1) .or .defined(SBC)
-  LDX #2
-.elseif .defined(OSI)
   LDX #1
-.endif
   JSR PrintSpaces
   JSR PrintDollar
   LDY #1
@@ -446,21 +413,12 @@ DOBB:                   ; handle special BBRn and BBSn instructions
   LSR
   LSR
   JSR PRHEX
-.if .defined(APPLE1) .or .defined(APPLE2) .or .defined(KIM1) .or .defined(SBC)
-  LDX #2
-.elseif .defined(OSI)
   LDX #1
-.endif
   JSR PrintSpaces
   JSR PrintDollar
   LDY #1
   LDA (ADDR),Y          ; get 1st operand byte (address)
   JSR PrintByte         ; display it
-.if .defined(APPLE1) .or .defined(APPLE2) .or .defined(KIM1) .or .defined(SBC)
-  LDA #','
-  JSR PrintChar
-  JSR PrintDollar
-.endif
 ; Handle relative addressing
 ; Destination address is Current address + relative (sign extended so upper byte is $00 or $FF) + 3
   LDY #2
@@ -501,11 +459,7 @@ TRYINV:
   BNE TRYACC
   JMP DONEOPS           ; no operands
 TRYACC:
-.if .defined(APPLE1) .or .defined(APPLE2) .or .defined(KIM1) .or .defined(SBC)
-  LDX #3
-.elseif .defined(OSI)
   LDX #1
-.endif
   JSR PrintSpaces
   CMP #AM_ACCUMULATOR
   BNE TRYIMM

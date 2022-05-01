@@ -6,13 +6,11 @@ deploy: build
 build: compile
 	ld65 -C build.cfg -m eatermon.map -o bin/eatermon.bin obj/wozmon.o obj/jmon.o obj/msbasic.o
 
-compile:	clean jmon
-	ca65 -o obj/wozmon.o src/wozmon.s
+compile:	clean
+	ca65 -l wozmon.lst -o obj/wozmon.o src/wozmon.s
+	ca65 -D osi -l basic.lst -o obj/msbasic.o src/msbasic/msbasic.s
 #	ca65 --feature labels_without_colons -o obj/tinybasic.o src/tinybasic.s
-	ca65 -D osi src/msbasic/msbasic.s -o obj/msbasic.o
-
-jmon:	src/jmon/jmon.s src/jmon/disasm.s src/jmon/miniasm.s src/jmon/trace.s src/jmon/info.s src/jmon/memtest4.s
-	ca65 -D SBC -g -l jmon.lst src/jmon/jmon.s -o obj/jmon.o
+	ca65 -D SBC -l jmon.lst -o obj/jmon.o src/jmon/jmon.s
 
 clean:
 	$(RM) obj/* bin/* *.map *.lst
